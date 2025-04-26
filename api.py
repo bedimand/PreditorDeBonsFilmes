@@ -111,6 +111,8 @@ class PredictRequest(BaseModel):
     def validate_runtime_minutes(cls, v):
         if v <= 0:
             raise ValueError('runtimeMinutes deve ser maior que 0')
+        if v > 180:
+            raise ValueError('runtimeMinutes deve ser no máximo 180')
         return v
 
     @validator('budget')
@@ -499,7 +501,7 @@ def serve_ui():
         <h1>Preditor de Sucesso de Filmes</h1>
         <form id="predictForm">
             <label>Duração (minutos):
-                <input type="number" id="runtimeMinutes" placeholder="ex: 120" required>
+                <input type="number" id="runtimeMinutes" placeholder="ex: 120" required max="180">
             </label>
             <label>Orçamento (em dólares):
                 <input type="number" id="budget" placeholder="ex: 500000" required>
@@ -531,7 +533,7 @@ def serve_ui():
             </label>
             <button type="button" id="btnPredict">Prever</button>
         </form>
-        <div id="result" style="white-space: pre-line; text-align:left; margin-top:15px;"></div>
+        <h2 id="result"></h2>
     </div>
     <script>
         async function makePrediction() {
@@ -554,20 +556,28 @@ def serve_ui():
                 document.getElementById('result').innerText = 'Probabilidade de sucesso prevista: ' + data.success_probability.toFixed(2) + '%';
             } else {
                 const err = await response.json();
-                // Organiza e exibe cada erro com o campo correspondente
-                const msgs = (err.detail || []).map(e => {
-                    const field = Array.isArray(e.loc) && e.loc.length >= 2 ? e.loc[1] : 'campo';
-                    return `${field}: ${e.msg}`;
-                }).join('\n');
-                document.getElementById('result').innerText = msgs;
+                // Extrai apenas as mensagens de validação
+                const msgs = (err.detail || []).map(e => e.msg).join('; ');
+                document.getElementById('result').innerText = 'Erro ' + response.status + ': ' + msgs;
             }
         }
-        // Disparo dos eventos de clique
-        document.getElementById('btnPredict').addEventListener('click', makePrediction);
-        document.getElementById('btnGenres').addEventListener('click', () => window.open('/genres', '_blank'));
-        document.getElementById('btnCompanies').addEventListener('click', () => window.open('/companies', '_blank'));
-        document.getElementById('btnLanguages').addEventListener('click', () => window.open('/languages', '_blank'));
-        document.getElementById('btnCountries').addEventListener('click', () => window.open('/countries', '_blank'));
+        // Disparo dos eventos após carregamento da página
+        window.onload = () => {
+            document.getElementById('btnPredict').addEventListener('click', makePrediction);
+            // Listagem de opções disponíveis
+            document.getElementById('btnGenres').addEventListener('click', () => {
+                window.open('/genres', '_blank');
+            });
+            document.getElementById('btnCompanies').addEventListener('click', () => {
+                window.open('/companies', '_blank');
+            });
+            document.getElementById('btnLanguages').addEventListener('click', () => {
+                window.open('/languages', '_blank');
+            });
+            document.getElementById('btnCountries').addEventListener('click', () => {
+                window.open('/countries', '_blank');
+            });
+        };
     </script>
 </body>
 </html>"""
