@@ -346,77 +346,10 @@ def movies_by_location(location_id: int, limit: int = 10, offset: int = 0):
     conn.close()
     return rows
 
-# ----- Search & Filter -----
-@app.get("/movies/search", response_model=List[Movie])
-def search_movies(query: str, limit: int = 10, offset: int = 0):
-    conn = get_db()
-    cursor = conn.cursor(dictionary=True)
-    term = f"%{query}%"
-    cursor.execute(
-        "SELECT id, primaryTitle, originalTitle, DATE_FORMAT(releaseDate, '%Y-%m-%d') AS releaseDate, "
-        "runtimeMinutes, averageRating, numVotes "
-        "FROM movies WHERE primaryTitle LIKE %s OR description LIKE %s LIMIT %s OFFSET %s",
-        (term, term, limit, offset)
-    )
-    rows = cursor.fetchall()
-    cursor.close()
-    conn.close()
-    return rows
-
-@app.get("/movies/filter", response_model=List[Movie])
-def filter_movies(year: Optional[int] = None, genre: Optional[str] = None, rating_min: Optional[float] = None, limit: int = 10, offset: int = 0):
-    conn = get_db()
-    cursor = conn.cursor(dictionary=True)
-    base = "SELECT DISTINCT m.id, m.primaryTitle, m.originalTitle, DATE_FORMAT(m.releaseDate, '%Y-%m-%d') AS releaseDate, m.runtimeMinutes, m.averageRating, m.numVotes FROM movies m"
-    joins = []
-    conds = []
-    params = []
-    if genre:
-        joins.append("JOIN movie_genres mg ON m.id=mg.movie_id JOIN genres g ON mg.genre_id=g.id")
-        conds.append("g.name=%s")
-        params.append(genre)
-    if year:
-        conds.append("m.startYear=%s")
-        params.append(year)
-    if rating_min:
-        conds.append("m.averageRating>=%s")
-        params.append(rating_min)
-    sql = " ".join([base] + joins + (["WHERE " + " AND ".join(conds)] if conds else []) + ["LIMIT %s OFFSET %s"])
-    params += [limit, offset]
-    cursor.execute(sql, tuple(params))
-    rows = cursor.fetchall()
-    cursor.close()
-    conn.close()
-    return rows
-
-@app.get("/movies/sort", response_model=List[Movie])
-def sort_movies(by: str = "averageRating", order: str = "desc", limit: int = 10, offset: int = 0):
-    conn = get_db()
-    cursor = conn.cursor(dictionary=True)
-    allowed = {"averageRating","numVotes","startYear"}
-    if by not in allowed:
-        by = "averageRating"
-    if order.lower() not in {"asc","desc"}:
-        order = "desc"
-    query = f"SELECT id, primaryTitle, originalTitle, DATE_FORMAT(releaseDate, '%Y-%m-%d') AS releaseDate, runtimeMinutes, averageRating, numVotes FROM movies ORDER BY {by} {order} LIMIT %s OFFSET %s"
-    cursor.execute(query, (limit, offset))
-    rows = cursor.fetchall()
-    cursor.close()
-    conn.close()
-    return rows
-
 # ----- Stats -----
 class GenreCount(BaseModel):
     name: str
     movie_count: int
-
-class CountryCount(BaseModel):
-    country_code: str
-    movie_count: int
-
-class RatingDistribution(BaseModel):
-    rating: float
-    count: int
 
 class YearlyCount(BaseModel):
     year: int
@@ -427,26 +360,6 @@ def stats_top_genres(limit: int = 10):
     conn = get_db()
     cursor = conn.cursor(dictionary=True)
     cursor.execute("SELECT g.name, COUNT(*) AS movie_count FROM movie_genres mg JOIN genres g ON mg.genre_id=g.id GROUP BY g.name ORDER BY movie_count DESC LIMIT %s", (limit,))
-    rows = cursor.fetchall()
-    cursor.close()
-    conn.close()
-    return rows
-
-@app.get("/stats/countries/top", response_model=List[CountryCount])
-def stats_top_countries(limit: int = 10):
-    conn = get_db()
-    cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT c.id AS country_code, COUNT(*) AS movie_count FROM movie_countries mc JOIN countries c ON mc.country_id=c.id GROUP BY c.id ORDER BY movie_count_DESC LIMIT %s", (limit,))
-    rows = cursor.fetchall()
-    cursor.close()
-    conn.close()
-    return rows
-
-@app.get("/stats/ratings/distribution", response_model=List[RatingDistribution])
-def stats_rating_distribution():
-    conn = get_db()
-    cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT averageRating AS rating, COUNT(*) AS count FROM movies GROUP BY averageRating ORDER BY rating")
     rows = cursor.fetchall()
     cursor.close()
     conn.close()
