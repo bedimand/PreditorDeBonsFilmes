@@ -139,7 +139,7 @@ http://localhost:8000/docs
       "runtimeMinutes": 120,
       "budget": 100000,
       "genres": ["Comedy"],
-      "production_companies": ["co0000001"],
+      "production_companies": ["Netflix"],
       "languages": ["en"],
       "countries": ["US"],
       "rating": "PG-13",
