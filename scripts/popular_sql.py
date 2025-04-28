@@ -5,9 +5,9 @@ import pycountry
 
 # Establish a connection to the MySQL server
 conn = mysql.connector.connect(
-    host="bernardo.ddns.net",  # Your MySQL host
-    user="ana",  # Your MySQL username
-    password="palmeiras10",  # Your MySQL password
+    host="localhost",  # Your MySQL host
+    user="root",  # Your MySQL username
+    password="12345678",  # Your MySQL password
     database="IMDB",  # Your database name
     port=3306  # MySQL port, default is 3306
 )

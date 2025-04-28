@@ -9,9 +9,9 @@ from fastapi.responses import HTMLResponse
 
 # Database connection settings
 DB_CONFIG = {
-    "host": "bernardo.ddns.net",
-    "user": "ana",
-    "password": "palmeiras10",
+    "host": "localhost",
+    "user": "root",
+    "password": "12345678",
     "database": "IMDB",
     "port": 3306
 }
