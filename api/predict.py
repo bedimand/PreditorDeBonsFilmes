@@ -1,5 +1,4 @@
 import requests
-import json
 
 # URL of the prediction API
 API_URL = "http://localhost:8000/predict"
