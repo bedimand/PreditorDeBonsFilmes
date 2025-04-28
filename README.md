@@ -1,6 +1,11 @@
-# API de Consulta IMDB
+# PreditorDeSucessoIMDB
 
-Este projeto fornece uma API REST para consulta de filmes e estatísticas a partir de um banco de dados MySQL contendo dados do IMDB, além de um endpoint de predição de probabilidade de sucesso de um filme com base em um modelo de Machine Learning.
+PreditorDeSucessoIMDB é uma aplicação para predição de sucesso de filmes usando dados do IMDB. O projeto inclui:
+
+- API REST para consulta de dados de filmes armazenados em MySQL.
+- Endpoint de predição da probabilidade de sucesso de um filme baseado em modelo de Random Forest Classifier.
+- Notebooks para coleta de dados via IMDB API (RapidAPI), análise exploratória e engenharia de features.
+- Armazenamento, processamento e visualização de dados em dashboard.
 
 ---
 
